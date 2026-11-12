@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stack Master</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap">
+<style>
+/* Layout: satu kolom 880px. Hero kiri, kartu XP, lalu Materi, Coba, Kuis. Warna dan font mengikuti brief. */
+:root {
+  --bg: #F8FAFC;
+  --card: #FFFFFF;
+  --primary: #4F46E5;
+  --secondary: #7C3AED;
+  --success: #10B981;
+  --text: #1E293B;
+  --muted: #64748B;
+  --line: #E2E8F0;
+  --primary-soft: #EEF2FF;
+  --success-soft: #D1FAE5;
+  --success-ink: #047857;
+  --danger: #E11D48;
+  --danger-soft: #FFE4E6;
+  --font-head: "Poppins", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius: 16px;
+  --shadow: 0 1px 2px rgba(30, 41, 59, 0.05), 0 4px 14px rgba(30, 41, 59, 0.06);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  padding-block: 32px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 880px; margin-inline: auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-head); line-height: 1.2; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+:focus-visible { outline: 3px solid var(--secondary); outline-offset: 2px; border-radius: 6px; }
+
+/* Header */
+.hero { display: flex; flex-direction: column; gap: 14px; padding-top: 8px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); }
+.hero h1 { font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 700; letter-spacing: -0.02em; }
+.hero .sub { font-size: 1.15rem; color: var(--muted); max-width: 52ch; }
+.flow { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.flow li { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 14px; }
+.flow li + li::before { content: "→"; color: var(--muted); }
+.flow a, .flow span {
+  display: inline-block; padding: 4px 12px; border-radius: 999px;
+  background: var(--primary-soft); color: var(--primary); text-decoration: none;
+}
+.flow a:hover { background: var(--primary); color: #fff; }
+.flow span { background: var(--success-soft); color: var(--success-ink); }
+
+/* Card */
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px; min-width: 0; }
+.section-head { display: flex; flex-direction: column; gap: 4px; margin-bottom: 18px; }
+.section-head .tag { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--secondary); }
+.section-head h2 { font-size: 1.6rem; font-weight: 600; }
+
+/* Dashboard */
+.dash { display: grid; gap: 18px; }
+.dash-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.level { font-family: var(--font-head); font-weight: 600; font-size: 1.35rem; }
+.xp-num { font-family: var(--font-head); font-weight: 600; color: var(--primary); font-variant-numeric: tabular-nums; }
+.bar { height: 14px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.bar > div { height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.4s ease; }
+.dash-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+  background: var(--line); color: var(--muted); font-weight: 600; font-size: 14px;
+}
+.badge.on { background: var(--success-soft); color: var(--success-ink); }
+.levelup {
+  padding: 12px 16px; border-radius: 12px; background: var(--primary-soft); color: var(--primary);
+  font-weight: 600; border: 1px solid #C7D2FE;
+}
+.btn {
+  font-family: var(--font-body); font-weight: 600; font-size: 15px; cursor: pointer;
+  border: 0; border-radius: 12px; padding: 11px 20px; background: var(--primary); color: #fff;
+  text-decoration: none; display: inline-block; transition: background 0.15s;
+}
+.btn:hover { background: #4338CA; }
+.btn.alt { background: var(--primary-soft); color: var(--primary); }
+.btn.alt:hover { background: #E0E7FF; }
+.btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.btn.ghost:hover { background: var(--bg); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Materi */
+.materi { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: start; }
+.quote { font-size: 1.05rem; padding-left: 16px; border-left: 3px solid var(--primary); }
+.lifo { margin-top: 16px; display: inline-block; font-family: var(--font-head); font-weight: 600; padding: 8px 14px; border-radius: 10px; background: var(--primary-soft); color: var(--primary); }
+.analogy { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+.analogy h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+.illus { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.row { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.box {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  border: 2px solid var(--primary); background: var(--primary-soft); color: var(--primary);
+  border-radius: 10px; padding: 10px 16px; font-family: var(--font-head); font-weight: 600; font-size: 1.15rem;
+}
+.box small { font-family: var(--font-body); font-size: 12px; font-weight: 500; color: var(--muted); text-align: right; }
+.box.top { background: var(--primary); color: #fff; }
+.box.top small { color: #E0E7FF; }
+.plates { display: flex; flex-direction: column; gap: 3px; margin-top: 14px; max-width: 240px; }
+.plates i { display: block; height: 10px; border-radius: 999px; background: #CBD5E1; }
+.plates i:first-child { background: var(--secondary); }
+
+/* Simulasi */
+.sim { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; }
+.controls .btn { min-width: 84px; }
+.sim-fb { margin-top: 16px; padding: 12px 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); min-height: 52px; }
+.sim-fb.pop { background: var(--success-soft); border-color: #A7F3D0; color: var(--success-ink); font-weight: 500; }
+.sim-fb.warn { background: var(--danger-soft); border-color: #FECDD3; color: #9F1239; }
+.stackview { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.slot { height: 52px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+.slot.empty { border: 2px dashed var(--line); color: #94A3B8; font-size: 13px; }
+.slot.item { background: var(--primary); color: #fff; font-family: var(--font-head); font-weight: 600; font-size: 1.25rem; animation: drop 0.22s ease-out; }
+.slot.item.top { background: var(--secondary); }
+.slot .ptr { font-family: var(--font-body); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; }
+.stackbase { height: 6px; border-radius: 999px; background: var(--muted); }
+.stackcap { font-size: 13px; color: var(--muted); text-align: center; }
+@keyframes drop { from { transform: translateY(-8px); opacity: 0.4; } to { transform: none; opacity: 1; } }
+
+/* Kuis */
+.qmeta { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--muted); font-weight: 500; margin-bottom: 8px; }
+.qdots { display: flex; gap: 6px; margin-bottom: 18px; }
+.qdots i { flex: 1; height: 6px; border-radius: 999px; background: var(--line); }
+.qdots i.done { background: var(--success); }
+.qdots i.now { background: var(--primary); }
+.qtext { font-family: var(--font-head); font-weight: 600; font-size: 1.25rem; margin-bottom: 16px; }
+.opts { display: grid; gap: 10px; }
+.opt {
+  display: flex; align-items: center; gap: 14px; text-align: left; width: 100%;
+  font-family: var(--font-body); font-size: 16px; color: var(--text); cursor: pointer;
+  background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 12px 16px;
+}
+.opt:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-soft); }
+.opt .k { flex: none; width: 30px; height: 30px; border-radius: 8px; background: var(--primary-soft); color: var(--primary); font-weight: 600; display: grid; place-items: center; }
+.opt.right { border-color: var(--success); background: var(--success-soft); }
+.opt.right .k { background: var(--success); color: #fff; }
+.opt.wrong { border-color: var(--danger); background: var(--danger-soft); }
+.opt.wrong .k { background: var(--danger); color: #fff; }
+.opt:disabled { cursor: default; }
+.opt:disabled:not(.right):not(.wrong) { opacity: 0.55; }
+.qfb { margin-top: 16px; padding: 14px 16px; border-radius: 12px; }
+.qfb.ok { background: var(--success-soft); color: var(--success-ink); }
+.qfb.no { background: var(--danger-soft); color: #9F1239; }
+.qfb strong { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: 2px; }
+.qnext { margin-top: 16px; }
+.result { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; padding-block: 8px; }
+.result h3 { font-size: 1.7rem; }
+.result dl { margin: 4px 0; display: grid; gap: 6px; justify-items: center; }
+.result dt { font-size: 13px; color: var(--muted); }
+.result dd { margin: 0; font-family: var(--font-head); font-weight: 600; font-size: 1.2rem; }
+.result .badge { font-size: 16px; padding: 10px 18px; }
+
+footer { text-align: center; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 720px) {
+  .materi, .sim { grid-template-columns: minmax(0, 1fr); }
+  .card { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .bar > div { transition: none; }
+  .slot.item { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Sistem Media Interaktif</span>
+    <h1>Stack Master</h1>
+    <p class="sub">Belajar Konsep LIFO dengan Cara Interaktif</p>
+    <ol class="flow" aria-label="Alur belajar">
+      <li><a href="#materi">Pelajari</a></li>
+      <li><a href="#coba">Coba</a></li>
+      <li><a href="#kuis">Kuis</a></li>
+      <li><span>Dapat XP</span></li>
+    </ol>
+  </header>
+
+  <section class="card dash" id="dashboard" aria-labelledby="lvl">
+    <div class="dash-top">
+      <h2 class="level" id="lvl">Level 1 — Pemula</h2>
+      <div class="xp-num" id="xpText">0 / 60 XP</div>
+    </div>
+    <div class="bar" role="progressbar" id="xpBar" aria-label="Progres XP" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0"><div id="xpFill"></div></div>
+    <div class="levelup" id="levelup" role="status" hidden>🎉 LEVEL UP! Kamu naik ke Level 2 — Stack Explorer</div>
+    <div class="dash-bottom">
+      <span class="badge" id="badge">🔒 Stack Beginner</span>
+      <a class="btn" href="#materi">Mulai Belajar</a>
+    </div>
+  </section>
+
+  <section class="card" id="materi" aria-labelledby="h-materi">
+    <div class="section-head">
+      <span class="tag">Pelajari</span>
+      <h2 id="h-materi">Apa itu Stack?</h2>
+    </div>
+    <div class="materi">
+      <div>
+        <p class="quote">Stack adalah struktur data yang menggunakan prinsip LIFO (Last In, First Out), yaitu data yang terakhir masuk akan menjadi data yang pertama keluar.</p>
+        <p class="lifo">LIFO = Last In, First Out</p>
+        <div class="analogy">
+          <h3>Contoh sehari-hari: tumpukan piring</h3>
+          <p>Piring yang terakhir diletakkan di atas adalah piring yang pertama diambil.</p>
+          <div class="plates" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+      <div class="illus" role="img" aria-label="Tumpukan tiga kotak: C di atas, lalu B, lalu A di bawah">
+        <div class="row">
+          <div class="box top">C <small>← terakhir masuk</small></div>
+          <div class="box">B <small></small></div>
+          <div class="box">A <small>← pertama masuk</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="coba" aria-labelledby="h-coba">
+    <div class="section-head">
+      <span class="tag">Coba</span>
+      <h2 id="h-coba">Coba Sendiri</h2>
+    </div>
+    <div class="sim">
+      <div>
+        <p style="margin-bottom:14px">Tekan Push untuk memasukkan data ke bagian atas Stack. Tekan Pop untuk mengeluarkannya.</p>
+        <div class="controls">
+          <button class="btn" id="pushA" type="button">Push A</button>
+          <button class="btn" id="pushB" type="button">Push B</button>
+          <button class="btn" id="pushC" type="button">Push C</button>
+          <button class="btn alt" id="pop" type="button">Pop</button>
+          <button class="btn ghost" id="resetStack" type="button">Reset Stack</button>
+        </div>
+        <div class="sim-fb" id="simFb" role="status" aria-live="polite">Stack masih kosong. Coba Push A, lalu B, lalu C.</div>
+      </div>
+      <div>
+        <div class="stackview" id="stackView" aria-label="Isi Stack saat ini"></div>
+        <p class="stackcap" style="margin-top:8px">Kapasitas simulasi: 3 data</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="kuis" aria-labelledby="h-kuis">
+    <div class="section-head">
+      <span class="tag">Kuis</span>
+      <h2 id="h-kuis">Uji Pemahamanmu</h2>
+    </div>
+    <div id="quizBox"></div>
+  </section>
+
+  <footer>Stack Master · Media interaktif Sistem Media Interaktif</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- Gamifikasi ---------- */
+  var XP_PER_CORRECT = 20;
+  var LEVEL_UP_XP = 60;
+  var xp = 0;
+  var finished = false;
+
+  function level() { return xp >= LEVEL_UP_XP ? 2 : 1; }
+  function renderXP() {
+    var lv = level();
+    var target = lv === 1 ? LEVEL_UP_XP : 100;
+    $("lvl").textContent = lv === 1 ? "Level 1 — Pemula" : "Level 2 — Stack Explorer";
+    $("xpText").textContent = xp + " / " + target + " XP";
+    $("xpFill").style.width = Math.min(100, (xp / target) * 100) + "%";
+    var bar = $("xpBar");
+    bar.setAttribute("aria-valuemax", String(target));
+    bar.setAttribute("aria-valuenow", String(xp));
+    $("levelup").hidden = lv < 2;
+    var b = $("badge");
+    if (finished) { b.textContent = "🏆 Stack Beginner — Unlocked!"; b.className = "badge on"; }
+    else { b.textContent = "🔒 Stack Beginner"; b.className = "badge"; }
+  }
+
+  /* ---------- Simulasi Stack ---------- */
+  var stack = [];
+  var MAX = 3;
+  var LETTERS = ["A", "B", "C"];
+
+  function setFb(msg, kind) {
+    var el = $("simFb");
+    el.textContent = msg;
+    el.className = "sim-fb" + (kind ? " " + kind : "");
+  }
+  function renderStack() {
+    var view = $("stackView");
+    view.innerHTML = "";
+    for (var i = MAX - 1; i >= 0; i--) {
+      var d = document.createElement("div");
+      if (stack[i]) {
+        var isTop = i === stack.length - 1;
+        d.className = "slot item" + (isTop ? " top" : "");
+        d.innerHTML = "<span>" + stack[i] + "</span>" + (isTop ? '<span class="ptr">TOP</span>' : "");
+      } else {
+        d.className = "slot empty";
+        d.textContent = i === stack.length ? "kosong" : "";
+      }
+      view.appendChild(d);
+    }
+    var base = document.createElement("div");
+    base.className = "stackbase";
+    view.appendChild(base);
+    LETTERS.forEach(function (l) { $("push" + l).disabled = stack.indexOf(l) !== -1; });
+  }
+  function push(l) {
+    if (stack.length >= MAX || stack.indexOf(l) !== -1) return;
+    stack.push(l);
+    setFb(l + " masuk ke Stack dan berada di posisi paling atas.", "");
+    renderStack();
+  }
+  function pop() {
+    if (!stack.length) { setFb("Stack masih kosong, belum ada data yang bisa di-Pop.", "warn"); return; }
+    var out = stack.pop();
+    var msg = out + " keluar dari Stack karena " + out + " adalah data yang terakhir masuk.";
+    setFb(msg, "pop");
+    renderStack();
+  }
+  LETTERS.forEach(function (l) { $("push" + l).addEventListener("click", function () { push(l); }); });
+  $("pop").addEventListener("click", pop);
+  $("resetStack").addEventListener("click", function () {
+    stack = [];
+    setFb("Stack dikosongkan. Coba Push A, lalu B, lalu C.", "");
+    renderStack();
+  });
+
+  /* ---------- Kuis ---------- */
+  var QUESTIONS = [
+    {
+      q: "Prinsip utama Stack adalah...?",
+      opts: ["FIFO", "LIFO", "Random", "FILO"],
+      answer: 1,
+      explain: "Stack memakai LIFO: data yang terakhir masuk adalah yang pertama keluar. FIFO dipakai pada antrean (Queue).",
+      hint: "Ingat: data yang terakhir masuk keluar lebih dulu.",
+      notes: { 3: "FILO sebenarnya sebutan lain untuk LIFO, tetapi istilah yang dipakai di materi ini adalah LIFO." }
+    },
+    {
+      q: "Jika Stack berisi A → B → C dan dilakukan Pop, data yang keluar adalah...?",
+      opts: ["A", "B", "C", "Semua data"],
+      answer: 2,
+      explain: "Pop mengambil data paling atas. C masuk paling akhir, jadi C berada di atas dan keluar lebih dulu.",
+      hint: "Pop selalu mengambil data di posisi paling atas. Siapa yang masuk paling akhir?"
+    },
+    {
+      q: "Contoh penerapan Stack dalam kehidupan sehari-hari adalah...?",
+      opts: ["Antrean loket", "Tumpukan piring", "Daftar hadir", "Jadwal kuliah"],
+      answer: 1,
+      explain: "Piring yang terakhir diletakkan ada di atas dan diambil pertama. Antrean loket justru FIFO.",
+      hint: "Pikirkan benda yang diambil dari bagian atas tumpukan."
+    }
+  ];
+  var qi = 0;
+  var locked = false;
+  var KEYS = ["A", "B", "C", "D"];
+
+  function dots(cur) {
+    var h = '<div class="qdots" aria-hidden="true">';
+    QUESTIONS.forEach(function (_, i) { h += '<i class="' + (i < cur ? "done" : i === cur ? "now" : "") + '"></i>'; });
+    return h + "</div>";
+  }
+  function renderQuestion() {
+    locked = false;
+    var Q = QUESTIONS[qi];
+    var h = '<div class="qmeta"><span>Pertanyaan ' + (qi + 1) + " dari " + QUESTIONS.length + "</span><span>+" + XP_PER_CORRECT + " XP per jawaban benar</span></div>" + dots(qi);
+    h += '<p class="qtext" id="qtext">' + Q.q + "</p>";
+    h += '<div class="opts" role="group" aria-labelledby="qtext">';
+    Q.opts.forEach(function (o, i) {
+      h += '<button type="button" class="opt" data-i="' + i + '"><span class="k">' + KEYS[i] + "</span><span>" + o + "</span></button>";
+    });
+    h += '</div><div id="qfb" aria-live="polite"></div><div id="qnext" class="qnext"></div>';
+    $("quizBox").innerHTML = h;
+    Array.prototype.forEach.call($("quizBox").querySelectorAll(".opt"), function (b) {
+      b.addEventListener("click", function () { choose(parseInt(b.getAttribute("data-i"), 10), b); });
+    });
+  }
+  function choose(i, btn) {
+    if (locked) return;
+    var Q = QUESTIONS[qi];
+    var fb = $("qfb");
+    if (i === Q.answer) {
+      locked = true;
+      xp += XP_PER_CORRECT;
+      btn.classList.add("right");
+      Array.prototype.forEach.call($("quizBox").querySelectorAll(".opt"), function (b) { b.disabled = true; });
+      fb.innerHTML = '<div class="qfb ok"><strong>✓ Benar! +' + XP_PER_CORRECT + " XP</strong>" + Q.explain + "</div>";
+      var last = qi === QUESTIONS.length - 1;
+      if (last) finished = true;
+      renderXP();
+      $("qnext").innerHTML = '<button type="button" class="btn" id="nextBtn">' + (last ? "Lihat Hasil" : "Pertanyaan berikutnya") + "</button>";
+      $("nextBtn").addEventListener("click", function () {
+        if (last) renderResult(); else { qi++; renderQuestion(); }
+      });
+      $("nextBtn").focus({ preventScroll: true });
+    } else {
+      btn.classList.add("wrong");
+      btn.disabled = true;
+      var note = (Q.notes && Q.notes[i]) ? Q.notes[i] : Q.hint;
+      fb.innerHTML = '<div class="qfb no"><strong>✕ Jawaban kurang tepat. Coba lagi!</strong>' + note + "</div>";
+    }
+  }
+  function renderResult() {
+    var lv = level() === 1 ? "1 — Pemula" : "2 — Stack Explorer";
+    $("quizBox").innerHTML =
+      '<div class="result">' +
+      '<h3>🎉 Kuis Selesai!</h3>' +
+      "<dl><div><dt>XP yang diperoleh</dt><dd>" + xp + " XP</dd></div>" +
+      "<div><dt>Level</dt><dd>" + lv + "</dd></div></dl>" +
+      '<span class="badge on">🏆 Stack Beginner — Unlocked!</span>' +
+      '<button type="button" class="btn alt" id="again">Ulangi Kuis</button></div>';
+    $("again").addEventListener("click", function () {
+      xp = 0; finished = false; qi = 0;
+      renderXP(); renderQuestion();
+    });
+  }
+
+  /* ---------- Mulai ---------- */
+  renderXP();
+  renderStack();
+  renderQuestion();
+})();
+</script>
+
+</body>
+</html>
